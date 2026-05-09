@@ -247,18 +247,20 @@ curl -X POST http://localhost:8001/api/explain-claim \
 
 ## Project Structure
 
-```
+```text
 GigShield/
+│
 ├── gigshield/
-│   └── main.py          # All FastAPI routes + ML model + LLM explainer
-├── index.html           # Landing page
-├── dashboard.html       # Admin dashboard
-├── requirements.txt     # Pinned Python dependencies
-├── .env.example         # Environment variable template
+│   ├── main.py              # FastAPI backend
+│   ├── dashboard.html       # Admin dashboard
+│   └── README.md
+│
+├── index.html               # Landing page
+├── requirements.txt         # Python dependencies
+├── .env.example             # Environment variables template
+├── .gitignore
 └── README.md
 ```
-
----
 
 ## Topics
 
