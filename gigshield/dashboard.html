@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GigShield — Demo Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" />
+<style>
+/* ── Reset & base ──────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0e1a;
+  --surface:#111827;
+  --card:#161f30;
+  --border:#1e2d45;
+  --accent:#3b82f6;
+  --accent2:#06b6d4;
+  --green:#22c55e;
+  --red:#ef4444;
+  --amber:#f59e0b;
+  --text:#f0f4ff;
+  --muted:#6b7a99;
+  --font-head:'Syne',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --radius:14px;
+  --shadow:0 4px 32px rgba(0,0,0,.45);
+}
+html{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;line-height:1.6}
+body{min-height:100vh;background:radial-gradient(ellipse 80% 60% at 50% -20%,rgba(59,130,246,.12) 0%,transparent 70%),var(--bg)}
+
+/* ── Layout ────────────────────────────────────────────────────── */
+.shell{max-width:1120px;margin:0 auto;padding:28px 20px 60px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;gap:16px;flex-wrap:wrap}
+.logo{font-family:var(--font-head);font-size:22px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(135deg,#3b82f6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo span{font-weight:400;opacity:.6}
+
+.grid{display:grid;gap:20px}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:800px){.grid-4,.grid-3{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}}
+@media(max-width:480px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}}
+
+/* ── Cards ─────────────────────────────────────────────────────── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(59,130,246,.04),transparent);pointer-events:none}
+.card-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.card-value{font-family:var(--font-head);font-size:28px;font-weight:700;line-height:1}
+.card-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.card-icon{position:absolute;top:20px;right:20px;font-size:28px;opacity:.35}
+
+/* ── Section titles ────────────────────────────────────────────── */
+.section-title{font-family:var(--font-head);font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── Forms ─────────────────────────────────────────────────────── */
+.form-group{display:flex;flex-direction:column;gap:6px}
+label{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+input,select{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font-body);font-size:14px;padding:10px 14px;outline:none;transition:border-color .2s}
+input:focus,select:focus{border-color:var(--accent)}
+select option{background:var(--surface)}
+
+/* ── Buttons ───────────────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-head);font-size:13px;font-weight:700;letter-spacing:.04em;border:none;border-radius:8px;cursor:pointer;padding:11px 22px;transition:all .18s;white-space:nowrap}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 24px rgba(59,130,246,.4)}
+.btn-green{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.btn-green:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 24px rgba(34,197,94,.4)}
+.btn-amber{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
+.btn-amber:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 24px rgba(245,158,11,.4)}
+.btn-red{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+.btn-red:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 24px rgba(239,68,68,.4)}
+.btn-outline{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn-outline:hover:not(:disabled){background:rgba(59,130,246,.1)}
+.btn-sm{padding:7px 14px;font-size:11px;border-radius:6px}
+.btn-full{width:100%}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap}
+
+/* ── Status badges ─────────────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:999px}
+.badge-green{background:rgba(34,197,94,.15);color:#22c55e}
+.badge-red{background:rgba(239,68,68,.15);color:#ef4444}
+.badge-amber{background:rgba(245,158,11,.15);color:#f59e0b}
+.badge-blue{background:rgba(59,130,246,.15);color:#3b82f6}
+.badge-gray{background:rgba(107,122,153,.15);color:var(--muted)}
+
+/* ── Fraud meter ────────────────────────────────────────────────── */
+.fraud-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.fraud-fill{height:100%;border-radius:3px;transition:width .4s ease}
+.fraud-fill.low{background:var(--green)}
+.fraud-fill.mid{background:var(--amber)}
+.fraud-fill.high{background:var(--red)}
+
+/* ── Result panel ──────────────────────────────────────────────── */
+#result-panel{display:none;border-radius:var(--radius);padding:22px 24px;border:1px solid var(--border);margin-top:16px;animation:slideDown .3s ease}
+#result-panel.approved{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.3)}
+#result-panel.rejected,#result-panel.duplicate{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3)}
+#result-panel.review{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.3)}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.result-headline{font-family:var(--font-head);font-size:20px;font-weight:700;margin-bottom:6px}
+.result-headline.approved{color:var(--green)}
+.result-headline.rejected,.result-headline.duplicate{color:var(--red)}
+.result-headline.review{color:var(--amber)}
+
+/* ── Claims list ────────────────────────────────────────────────── */
+.claim-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
+.claim-row:last-child{border-bottom:none}
+.claim-type{font-weight:600;font-size:14px}
+.claim-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.claim-amount{font-family:var(--font-head);font-size:16px;font-weight:700}
+
+/* ── AI explanation box ─────────────────────────────────────────── */
+.ai-box{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.18);border-radius:10px;padding:14px 16px;margin-top:12px}
+.ai-box-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent2);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.ai-row{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--muted);margin-top:4px}
+.ai-row::before{content:'›';color:var(--accent);flex-shrink:0;margin-top:1px}
+
+/* ── Pulse dot ──────────────────────────────────────────────────── */
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.8s ease infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.5)}50%{box-shadow:0 0 0 6px rgba(34,197,94,0)}}
+
+/* ── Toast ──────────────────────────────────────────────────────── */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 22px;font-size:14px;z-index:999;transition:transform .3s ease;white-space:nowrap;box-shadow:var(--shadow)}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ── Spinner ────────────────────────────────────────────────────── */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Tabs ───────────────────────────────────────────────────────── */
+.tabs{display:flex;gap:4px;background:var(--surface);border-radius:10px;padding:4px;margin-bottom:24px;border:1px solid var(--border)}
+.tab-btn{flex:1;padding:8px 12px;font-family:var(--font-head);font-size:12px;font-weight:700;letter-spacing:.04em;border:none;border-radius:7px;cursor:pointer;background:none;color:var(--muted);transition:all .2s}
+.tab-btn.active{background:var(--accent);color:#fff}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- Header -->
+  <header>
+    <div>
+      <div class="logo">GigShield</span></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">AI-Powered Parametric Micro-Insurance · Demo</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="pulse"></div>
+      <span style="font-size:12px;color:var(--green);font-weight:600">System Online</span>
+      <span id="hdr-user" style="font-size:12px;color:var(--muted);margin-left:8px"></span>
+    </div>
+  </header>
+
+  <!-- KPI Row -->
+  <div class="grid grid-4" style="margin-bottom:24px">
+    <div class="card">
+      <div class="card-icon">👤</div>
+      <div class="card-label">Active User</div>
+      <div class="card-value" id="kpi-user" style="font-size:20px">—</div>
+      <div class="card-sub" id="kpi-plan">No plan</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">📈</div>
+      <div class="card-label">Predicted Weekly</div>
+      <div class="card-value" id="kpi-income">—</div>
+      <div class="card-sub" id="kpi-method">moving average</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🛡</div>
+      <div class="card-label">Weekly Cap</div>
+      <div class="card-value" id="kpi-cap">—</div>
+      <div class="card-sub">Max payout / week</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">💰</div>
+      <div class="card-label">Accumulated</div>
+      <div class="card-value" id="kpi-total">₹0</div>
+      <div class="card-sub">This week so far</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('register',this)">① Register</button>
+    <button class="tab-btn" onclick="switchTab('trigger',this)">② Trigger Claim</button>
+    <button class="tab-btn" onclick="switchTab('claims',this)">③ My Claims</button>
+    <button class="tab-btn" onclick="switchTab('gps',this)">④ GPS Analysis</button>
+  </div>
+
+  <!-- TAB 1: Register -->
+  <div class="tab-pane active" id="tab-register">
+    <div class="section-title">Register / Load User</div>
+    <div class="grid grid-2" style="gap:20px">
+      <div class="card">
+        <div class="card-label" style="margin-bottom:16px">New Worker Registration</div>
+        <div class="grid" style="gap:12px">
+          <div class="form-group">
+            <label>Username</label>
+            <input id="reg-username" type="text" placeholder="e.g. raju" value="raju" />
+          </div>
+          <div class="form-group">
+            <label>Insurance Plan</label>
+            <select id="reg-plan">
+              <option value="basic">Basic — Rs. 20/wk · Cap Rs. 150</option>
+              <option value="standard" selected>Standard — Rs. 30/wk · Cap Rs. 200</option>
+              <option value="premium">Premium — Rs. 50/wk · Cap Rs. 300</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Avg Daily Earnings (Rs.)</label>
+            <input id="reg-daily" type="number" value="633" min="200" max="2000" />
+          </div>
+          <button class="btn btn-primary btn-full" onclick="registerUser()">
+            Register &amp; Predict Income
+          </button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-label" style="margin-bottom:16px">Load Existing Demo User</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Pre-seeded users available with mock earnings history and predicted income.</p>
+        <div class="grid" style="gap:8px">
+          <button class="btn btn-outline btn-full" onclick="loadUser('raju')">Load Raju · Standard · Bandra</button>
+          <button class="btn btn-outline btn-full" onclick="loadUser('priya')">Load Priya · Premium · Mumbai</button>
+          <button class="btn btn-outline btn-full" onclick="loadUser('demo')">Load Demo · Basic</button>
+        </div>
+        <div id="reg-result" style="margin-top:14px;font-size:13px;color:var(--green);display:none"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: Trigger Claim -->
+  <div class="tab-pane" id="tab-trigger">
+    <div class="section-title">Parametric Claim Trigger</div>
+    <div class="grid grid-2" style="gap:20px">
+      <div class="card">
+        <div class="card-label" style="margin-bottom:16px">Trigger Conditions</div>
+        <div class="grid" style="gap:12px">
+          <div class="form-group">
+            <label>Username</label>
+            <input id="trg-user" type="text" value="raju" />
+          </div>
+          <div class="form-group">
+            <label>Working Hours Today</label>
+            <input id="trg-hours" type="number" value="7" min="0" max="12" step="0.5" />
+          </div>
+          <div class="form-group">
+            <label>Event Type</label>
+            <select id="trg-event">
+              <option value="rain">🌧 Heavy Rain (≥80 mm/hr)</option>
+              <option value="aqi">💨 Severe AQI (≥300)</option>
+              <option value="flood">🌊 Urban Flood Alert</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>GPS Movement</label>
+            <select id="trg-movement">
+              <option value="true">✅ Movement detected (active)</option>
+              <option value="false">❌ No movement (stationary)</option>
+            </select>
+          </div>
+          <button class="btn btn-green btn-full" id="trg-btn" onclick="triggerClaim()">
+            🚀 Fire Parametric Trigger
+          </button>
+        </div>
+
+        <!-- Quick test scenarios -->
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Quick Demo Scenarios</div>
+          <div class="btn-row">
+            <button class="btn btn-sm btn-green" onclick="setScenario(1)">✅ Case 1: Approve</button>
+            <button class="btn btn-sm btn-red" onclick="setScenario(2)">❌ Case 2: Low Hours</button>
+            <button class="btn btn-sm btn-red" onclick="setScenario(3)">❌ Case 3: No GPS</button>
+            <button class="btn btn-sm btn-amber" onclick="setScenario(4)">🔁 Case 4: Duplicate</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result panel -->
+      <div>
+        <div id="result-panel">
+          <div class="result-headline" id="result-headline"></div>
+          <div id="result-msg" style="font-size:14px;color:var(--muted);margin-bottom:12px"></div>
+          <div class="grid grid-2" style="gap:10px;margin-bottom:12px">
+            <div>
+              <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Payout</div>
+              <div style="font-family:var(--font-head);font-size:22px;font-weight:700" id="result-payout">—</div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Event</div>
+              <div style="font-size:14px;font-weight:600" id="result-event">—</div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Fraud Score</div>
+              <div style="font-size:14px;font-weight:700" id="result-fraud-score">—</div>
+              <div class="fraud-track" style="margin-top:6px"><div class="fraud-fill" id="result-fraud-bar" style="width:0%"></div></div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Decision</div>
+              <div id="result-decision">—</div>
+            </div>
+          </div>
+          <!-- AI Explanation -->
+          <div class="ai-box" id="ai-explain-box" style="display:none">
+            <div class="ai-box-title">🤖 AI Explanation</div>
+            <div id="ai-explain-rows"></div>
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(59,130,246,.15)">
+              <span style="font-size:11px;color:var(--muted)">Flags: </span>
+              <span id="ai-flags" style="font-size:12px;color:var(--accent2);font-weight:600"></span>
+            </div>
+          </div>
+        </div>
+        <!-- Empty state -->
+        <div id="result-empty" class="card" style="text-align:center;padding:40px">
+          <div style="font-size:32px;margin-bottom:10px">⚡</div>
+          <div style="font-family:var(--font-head);font-size:16px;font-weight:700;margin-bottom:6px">Ready to Fire</div>
+          <div style="font-size:13px;color:var(--muted)">Select a scenario and hit the trigger button.<br>The AI pipeline runs in real time.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: Claims -->
+  <div class="tab-pane" id="tab-claims">
+    <div class="section-title">Claims History</div>
+    <div class="card">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap">
+        <input id="claims-user" type="text" placeholder="Username" value="raju" style="width:160px" />
+        <button class="btn btn-primary" onclick="loadClaims()">Load Claims</button>
+        <button class="btn btn-outline" onclick="resetWeek()">🔄 Reset Week</button>
+      </div>
+      <div id="claims-list">
+        <div style="text-align:center;padding:32px;color:var(--muted);font-size:14px">Enter a username and click Load Claims</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: GPS Analysis -->
+  <div class="tab-pane" id="tab-gps">
+    <div class="section-title">GPS Fraud Analysis</div>
+    <div class="grid grid-2" style="gap:20px">
+      <div class="card">
+        <div class="card-label" style="margin-bottom:16px">GPS Points (JSON)</div>
+        <textarea id="gps-input" rows="10" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:monospace;font-size:12px;padding:12px;resize:vertical;outline:none">[
+  {"lat":19.0596,"lng":72.8295,"speed":25,"accuracy":10},
+  {"lat":19.0602,"lng":72.8301,"speed":28,"accuracy":8},
+  {"lat":19.0615,"lng":72.8312,"speed":30,"accuracy":12},
+  {"lat":19.0628,"lng":72.8320,"speed":22,"accuracy":9},
+  {"lat":19.0641,"lng":72.8335,"speed":26,"accuracy":11},
+  {"lat":19.0655,"lng":72.8348,"speed":24,"accuracy":10},
+  {"lat":19.0668,"lng":72.8360,"speed":27,"accuracy":8},
+  {"lat":19.0679,"lng":72.8372,"speed":23,"accuracy":9},
+  {"lat":19.0691,"lng":72.8385,"speed":25,"accuracy":11},
+  {"lat":19.0703,"lng":72.8397,"speed":22,"accuracy":10}
+]</textarea>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn btn-primary" onclick="analyzeGPS()">Analyze GPS</button>
+          <button class="btn btn-outline btn-sm" onclick="loadGPSPreset('normal')">Normal</button>
+          <button class="btn btn-outline btn-sm" onclick="loadGPSPreset('stationary')">Stationary</button>
+          <button class="btn btn-outline btn-sm" onclick="loadGPSPreset('spoof')">Spoofed</button>
+          <button class="btn btn-outline btn-sm" onclick="loadGPSPreset('jump')">Impossible Jump</button>
+        </div>
+      </div>
+      <div class="card" id="gps-result-card">
+        <div class="card-label" style="margin-bottom:12px">Analysis Result</div>
+        <div id="gps-result" style="color:var(--muted);font-size:13px">Run analysis to see fraud detection results.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /shell -->
+
+<div id="toast"></div>
+
+<script>
+const BASE = 'http://127.0.0.1:8000';
+let currentUser = null;
+
+// ── Tab switching ────────────────────────────────────────────────
+function switchTab(id, el) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── Toast ────────────────────────────────────────────────────────
+let _toastT;
+function toast(msg, dur = 3500) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastT);
+  _toastT = setTimeout(() => el.classList.remove('show'), dur);
+}
+
+// ── KPI update ───────────────────────────────────────────────────
+function updateKPIs(username, data, total = 0) {
+  currentUser = username;
+  document.getElementById('hdr-user').textContent = username;
+  document.getElementById('kpi-user').textContent = username.charAt(0).toUpperCase() + username.slice(1);
+  document.getElementById('kpi-plan').textContent = (data.plan || '').toUpperCase() + ' plan · Active';
+  document.getElementById('kpi-income').textContent = '₹' + Math.round(data.predicted_income || 0);
+  document.getElementById('kpi-method').textContent = data.prediction_method || 'moving average';
+  document.getElementById('kpi-cap').textContent = '₹' + (data.weekly_cap || 0);
+  document.getElementById('kpi-total').textContent = '₹' + Math.round(total);
+  // pre-fill trigger username
+  document.getElementById('trg-user').value = username;
+  document.getElementById('claims-user').value = username;
+}
+
+// ── Register ─────────────────────────────────────────────────────
+async function registerUser() {
+  const username = document.getElementById('reg-username').value.trim();
+  const plan     = document.getElementById('reg-plan').value;
+  const daily    = parseFloat(document.getElementById('reg-daily').value) || 633;
+  if (!username) return toast('⚠ Enter a username');
+  try {
+    const res = await fetch(BASE + '/api/users/register', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ username, plan, base_daily_earnings: daily })
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Registration failed');
+    // load back the user to update KPIs
+    await loadUser(username);
+    const box = document.getElementById('reg-result');
+    box.style.display = 'block';
+    box.textContent = `✅ Registered! Predicted income: ₹${Math.round(d.predicted_income)} (${d.prediction_method})`;
+    toast(`✅ ${username} registered on ${plan} plan`);
+  } catch(e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+async function loadUser(username) {
+  try {
+    const res = await fetch(BASE + '/api/users/' + username);
+    const d   = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'User not found');
+    // get weekly total from claims
+    const cr = await fetch(BASE + '/api/claims/' + username);
+    const cd = await cr.json();
+    updateKPIs(username, d.data, cd.weekly_total || 0);
+    toast(`👤 Loaded ${username}`);
+  } catch(e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+// ── Scenarios ────────────────────────────────────────────────────
+function setScenario(n) {
+  const u = document.getElementById('trg-user').value || 'raju';
+  if (n === 1) {
+    document.getElementById('trg-hours').value    = 7;
+    document.getElementById('trg-event').value    = 'rain';
+    document.getElementById('trg-movement').value = 'true';
+    toast('📋 Case 1: Rain + 7 hrs + movement → should APPROVE');
+  } else if (n === 2) {
+    document.getElementById('trg-hours').value    = 3;
+    document.getElementById('trg-event').value    = 'rain';
+    document.getElementById('trg-movement').value = 'true';
+    toast('📋 Case 2: Rain + 3 hrs → should REJECT (low hours)');
+  } else if (n === 3) {
+    document.getElementById('trg-hours').value    = 7;
+    document.getElementById('trg-event').value    = 'rain';
+    document.getElementById('trg-movement').value = 'false';
+    toast('📋 Case 3: Rain + 7 hrs + no movement → should REJECT');
+  } else if (n === 4) {
+    document.getElementById('trg-hours').value    = 7;
+    document.getElementById('trg-event').value    = 'rain';
+    document.getElementById('trg-movement').value = 'true';
+    toast('📋 Case 4: Submit same claim twice → second should DUPLICATE');
+  }
+}
+
+// ── Trigger Claim ────────────────────────────────────────────────
+async function triggerClaim() {
+  const username  = document.getElementById('trg-user').value.trim();
+  const hours     = parseFloat(document.getElementById('trg-hours').value) || 7;
+  const eventSel  = document.getElementById('trg-event').value;
+  const movement  = document.getElementById('trg-movement').value === 'true';
+
+  if (!username) return toast('⚠ Set a username first (Tab 1)');
+
+  const btn = document.getElementById('trg-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Processing...';
+
+  const body = { username, working_hours: hours, movement };
+  if (eventSel === 'rain')  body.rain  = 85;
+  if (eventSel === 'aqi')   body.aqi   = 320;
+  if (eventSel === 'flood') body.flood = true;
+
+  try {
+    const res = await fetch(BASE + '/trigger', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Trigger failed');
+    showResult(d.claim);
+    // refresh KPIs
+    if (currentUser === username) {
+      const cr = await fetch(BASE + '/api/claims/' + username);
+      const cd = await cr.json();
+      document.getElementById('kpi-total').textContent = '₹' + Math.round(cd.weekly_total || 0);
+    }
+  } catch(e) {
+    toast('❌ ' + (e.message.includes('Failed to fetch') ? 'Cannot reach backend at ' + BASE + '. Is FastAPI running?' : e.message));
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🚀 Fire Parametric Trigger';
+  }
+}
+
+function showResult(claim) {
+  const panel    = document.getElementById('result-panel');
+  const empty    = document.getElementById('result-empty');
+  const headline = document.getElementById('result-headline');
+  const msg      = document.getElementById('result-msg');
+  const payout   = document.getElementById('result-payout');
+  const event    = document.getElementById('result-event');
+  const fscore   = document.getElementById('result-fraud-score');
+  const fbar     = document.getElementById('result-fraud-bar');
+  const fdec     = document.getElementById('result-decision');
+  const aiBox    = document.getElementById('ai-explain-box');
+  const aiRows   = document.getElementById('ai-explain-rows');
+  const aiFlags  = document.getElementById('ai-flags');
+
+  const s = claim.status;
+  panel.style.display = 'block';
+  panel.className = s;
+  empty.style.display = 'none';
+
+  if (s === 'approved') {
+    headline.textContent = '✅ Claim Approved — ₹' + Math.round(claim.payout_amount);
+    headline.className   = 'result-headline approved';
+    msg.textContent      = 'Will be paid on Friday with your weekly summary.';
+    payout.textContent   = '₹' + Math.round(claim.payout_amount);
+    toast('✅ Claim approved! ₹' + Math.round(claim.payout_amount) + ' queued for Friday');
+  } else if (s === 'review') {
+    headline.textContent = '⏳ Claim Under Review';
+    headline.className   = 'result-headline review';
+    msg.textContent      = 'GPS activity needs manual verification before Friday payout.';
+    payout.textContent   = '₹' + Math.round(claim.payout_amount) + ' (pending)';
+    toast('⏳ Claim under review');
+  } else {
+    const statusLabel = s === 'duplicate' ? '🔁 Duplicate Claim' : '❌ Claim Rejected';
+    headline.textContent = statusLabel;
+    headline.className   = 'result-headline rejected';
+    msg.textContent      = claim.message || 'Eligibility conditions not met.';
+    payout.textContent   = '₹0';
+    toast('❌ ' + (claim.message || 'Claim rejected'));
+  }
+
+  event.textContent  = claim.event_label || claim.event_type || '—';
+  const fs = claim.fraud_score || 0;
+  fscore.textContent = fs + '/100';
+  fbar.style.width   = fs + '%';
+  fbar.className     = 'fraud-fill ' + (fs < 40 ? 'low' : fs < 70 ? 'mid' : 'high');
+  fscore.style.color = fs < 40 ? 'var(--green)' : fs < 70 ? 'var(--amber)' : 'var(--red)';
+
+  const dec = claim.fraud_decision || '—';
+  const decColor = dec === 'APPROVE' ? 'var(--green)' : dec === 'REVIEW' ? 'var(--amber)' : 'var(--red)';
+  fdec.innerHTML = `<span class="badge" style="background:${decColor}20;color:${decColor}">${dec}</span>`;
+
+  // AI explanation
+  const explanations = claim.fraud_explanation || [];
+  const flags = claim.fraud_flags || [];
+  if (explanations.length) {
+    aiBox.style.display = 'block';
+    aiRows.innerHTML = explanations.map(e => `<div class="ai-row">${e}</div>`).join('');
+    aiFlags.textContent = flags.length ? flags.join(' · ') : 'None';
+  } else {
+    aiBox.style.display = 'none';
+  }
+}
+
+// ── Claims list ───────────────────────────────────────────────────
+async function loadClaims() {
+  const username = document.getElementById('claims-user').value.trim();
+  if (!username) return toast('⚠ Enter a username');
+  const el = document.getElementById('claims-list');
+  el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px">Loading...</div>';
+  try {
+    const res = await fetch(BASE + '/api/claims/' + username);
+    const d   = await res.json();
+    if (!d.data || !d.data.length) {
+      el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted);font-size:14px">No claims found for ' + username + '</div>';
+      return;
+    }
+    const icons = { approved:'✅', rejected:'❌', duplicate:'🔁', review:'⏳' };
+    const labels = { HEAVY_RAIN:'🌧 Heavy Rain', EXTREME_HEAT:'🌡 Extreme Heat', SEVERE_AQI:'💨 Severe AQI', URBAN_FLOOD:'🌊 Urban Flood', CURFEW:'🚫 Curfew' };
+    el.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <span style="font-size:13px;color:var(--muted)">${d.count} claim(s) found</span>
+        <span style="font-family:var(--font-head);font-size:14px;font-weight:700">Weekly total: <span style="color:var(--green)">₹${Math.round(d.weekly_total || 0)}</span></span>
+      </div>
+      ${d.data.map(c => {
+        const fs = c.fraud_score || 0;
+        const fc = fs < 40 ? 'low' : fs < 70 ? 'mid' : 'high';
+        const sc = c.status || 'unknown';
+        const bdgColor = sc === 'approved' ? 'var(--green)' : sc === 'review' ? 'var(--amber)' : 'var(--red)';
+        return `
+        <div class="claim-row">
+          <div>
+            <div class="claim-type">${labels[c.event_type] || c.event_type}</div>
+            <div class="claim-meta">${c.claim_date || ''} · Fraud: ${fs}/100 · ${c.fraud_decision || ''}</div>
+            <div class="claim-meta" style="margin-top:2px;color:var(--accent2)">${(c.fraud_explanation || []).join(' | ')}</div>
+          </div>
+          <span class="badge" style="background:${bdgColor}20;color:${bdgColor}">${icons[sc] || ''} ${sc.toUpperCase()}</span>
+          <div class="claim-amount" style="color:${sc==='approved'?'var(--green)':'var(--muted)'}">
+            ${sc === 'approved' ? '₹' + Math.round(c.payout_amount) : '—'}
+          </div>
+        </div>`;
+      }).join('')}`;
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--red);font-size:13px;padding:16px">Error: ' + e.message + '<br>Make sure FastAPI is running at ' + BASE + '</div>';
+  }
+}
+
+async function resetWeek() {
+  if (!confirm('Reset all weekly totals and claims?')) return;
+  await fetch(BASE + '/api/weekly-reset', {method:'POST'});
+  document.getElementById('kpi-total').textContent = '₹0';
+  document.getElementById('claims-list').innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">Week reset. Claims cleared.</div>';
+  toast('🔄 Week reset');
+}
+
+// ── GPS Analysis ──────────────────────────────────────────────────
+const GPS_PRESETS = {
+  normal: [
+    {lat:19.0596,lng:72.8295,speed:25,accuracy:10},{lat:19.0602,lng:72.8301,speed:28,accuracy:8},
+    {lat:19.0615,lng:72.8312,speed:30,accuracy:12},{lat:19.0628,lng:72.8320,speed:22,accuracy:9},
+    {lat:19.0641,lng:72.8335,speed:26,accuracy:11},{lat:19.0655,lng:72.8348,speed:24,accuracy:10},
+    {lat:19.0668,lng:72.8360,speed:27,accuracy:8},{lat:19.0679,lng:72.8372,speed:23,accuracy:9},
+    {lat:19.0691,lng:72.8385,speed:25,accuracy:11},{lat:19.0703,lng:72.8397,speed:22,accuracy:10}
+  ],
+  stationary: [
+    {lat:19.0596,lng:72.8295,speed:0,accuracy:5},{lat:19.0596,lng:72.8295,speed:0,accuracy:5},
+    {lat:19.0596,lng:72.8295,speed:0,accuracy:5},{lat:19.0596,lng:72.8295,speed:0,accuracy:5},
+    {lat:19.0596,lng:72.8295,speed:0,accuracy:5},{lat:19.0596,lng:72.8295,speed:0,accuracy:5},
+    {lat:19.0596,lng:72.8295,speed:0,accuracy:5},{lat:19.0596,lng:72.8295,speed:0,accuracy:5},
+    {lat:19.0596,lng:72.8295,speed:0,accuracy:5},{lat:19.0596,lng:72.8295,speed:0,accuracy:5}
+  ],
+  spoof: [
+    {lat:19.0596,lng:72.8295,speed:25,accuracy:0},{lat:19.0602,lng:72.8301,speed:28,accuracy:0},
+    {lat:19.0615,lng:72.8312,speed:30,accuracy:0},{lat:19.0628,lng:72.8320,speed:22,accuracy:0},
+    {lat:19.0641,lng:72.8335,speed:26,accuracy:0},{lat:19.0655,lng:72.8348,speed:24,accuracy:0},
+    {lat:19.0668,lng:72.8360,speed:27,accuracy:0},{lat:19.0679,lng:72.8372,speed:23,accuracy:0},
+    {lat:19.0691,lng:72.8385,speed:25,accuracy:0},{lat:19.0703,lng:72.8397,speed:22,accuracy:0}
+  ],
+  jump: [
+    {lat:19.0596,lng:72.8295,speed:25,accuracy:10},{lat:22.5726,lng:88.3639,speed:250,accuracy:10},
+    {lat:19.0615,lng:72.8312,speed:30,accuracy:12},{lat:28.6139,lng:77.2090,speed:300,accuracy:10},
+    {lat:19.0641,lng:72.8335,speed:26,accuracy:11},{lat:13.0827,lng:80.2707,speed:200,accuracy:10},
+    {lat:19.0668,lng:72.8360,speed:27,accuracy:8},{lat:12.9716,lng:77.5946,speed:180,accuracy:9},
+    {lat:19.0691,lng:72.8385,speed:25,accuracy:11},{lat:17.3850,lng:78.4867,speed:160,accuracy:10}
+  ]
+};
+
+function loadGPSPreset(name) {
+  document.getElementById('gps-input').value = JSON.stringify(GPS_PRESETS[name], null, 2);
+}
+
+async function analyzeGPS() {
+  let points;
+  try {
+    points = JSON.parse(document.getElementById('gps-input').value);
+  } catch(e) {
+    return toast('❌ Invalid JSON');
+  }
+  try {
+    const res = await fetch(BASE + '/api/analyze-gps', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(points)
+    });
+    const d = await res.json();
+    const r = d.data;
+    const fs = r.score;
+    const fc = fs < 40 ? 'low' : fs < 70 ? 'mid' : 'high';
+    const decColor = r.decision === 'APPROVE' ? 'var(--green)' : r.decision === 'REVIEW' ? 'var(--amber)' : 'var(--red)';
+    document.getElementById('gps-result').innerHTML = `
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Fraud Score</div>
+        <div style="font-family:var(--font-head);font-size:32px;font-weight:800;color:${decColor}">${fs}<span style="font-size:14px;opacity:.6">/100</span></div>
+        <div class="fraud-track" style="margin-top:8px;height:8px"><div class="fraud-fill ${fc}" style="width:${fs}%"></div></div>
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Decision</div>
+        <span class="badge" style="background:${decColor}20;color:${decColor};font-size:14px;padding:6px 16px">${r.decision}</span>
+      </div>
+      ${r.flags.length ? `
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Fraud Flags</div>
+        ${r.flags.map(f => `<span class="badge badge-red" style="margin-right:6px;margin-bottom:4px">${f}</span>`).join('')}
+      </div>` : `<div style="color:var(--green);font-size:13px;margin-bottom:12px">✅ No fraud flags detected</div>`}
+      <div class="ai-box">
+        <div class="ai-box-title">🤖 AI Explanation</div>
+        ${(r.explanation || []).map(e => `<div class="ai-row">${e}</div>`).join('')}
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:var(--muted)">Points analyzed: ${points.length}</div>
+    `;
+  } catch(e) {
+    toast('❌ ' + (e.message.includes('Failed to fetch') ? 'Cannot reach backend at ' + BASE : e.message));
+  }
+}
+
+// ── Auto-load raju on startup ─────────────────────────────────────
+window.addEventListener('load', () => {
+  setTimeout(() => loadUser('raju'), 400);
+});
+</script>
+</body>
+</html>

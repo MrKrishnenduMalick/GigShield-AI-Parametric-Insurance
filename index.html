@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>GigShield</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial;
+      background: linear-gradient(135deg, #0F172A, #020617);
+      color: white;
+      text-align: center;
+      margin: 0;
+    }
+
+    h1 {
+      margin-top: 20px;
+      font-size: 32px;
+    }
+
+    .card {
+      background: #1E293B;
+      margin: 15px auto;
+      padding: 20px;
+      border-radius: 16px;
+      width: 300px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 10px;
+      border: none;
+      width: 90%;
+    }
+
+    button {
+      background: linear-gradient(135deg, #4F46E5, #6366F1);
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .notif {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #22C55E;
+      padding: 12px;
+      border-radius: 10px;
+    }
+  </style>
+
+</head>
+
+<body>
+
+<h1>🚀 GigShield</h1>
+
+<!-- LOGIN -->
+
+<div class="card">
+  <h3>Login</h3>
+  <input id="phone" placeholder="Phone"><br>
+  <button onclick="sendOTP()">Send OTP</button><br>
+  <input id="otp" placeholder="OTP"><br>
+  <button onclick="verifyOTP()">Verify OTP</button>
+</div>
+
+<!-- REGISTER -->
+
+<div class="card">
+  <h3>Register</h3>
+  <input id="name" placeholder="Name"><br>
+  <input id="city" placeholder="City"><br>
+  <button onclick="register()">Register</button>
+</div>
+
+<!-- ACTIONS -->
+
+<div class="card">
+  <h3>Actions</h3>
+  <button onclick="trigger()">Simulate Risk</button>
+  <button onclick="payout()">Run Payout</button>
+  <button onclick="profile()">View Profile</button>
+</div>
+
+<!-- OUTPUT -->
+
+<div class="card">
+  <h3>Dashboard</h3>
+  <pre id="output"></pre>
+</div>
+
+<script>
+let token = "";
+
+// 👉 CHANGE THIS if backend is deployed
+const API = "http://127.0.0.1:8000/api";
+
+function notify(msg){
+  const n = document.createElement("div");
+  n.className = "notif";
+  n.innerText = msg;
+  document.body.appendChild(n);
+  setTimeout(()=>n.remove(),3000);
+}
+
+// 🔐 SEND OTP
+async function sendOTP(){
+  const phone = document.getElementById("phone").value;
+
+  const res = await fetch(API + "/auth/send-otp", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({phone})
+  });
+
+  const data = await res.json();
+  notify("OTP: " + data.otp);
+}
+
+// 🔐 VERIFY OTP
+async function verifyOTP(){
+  const phone = document.getElementById("phone").value;
+  const otp = document.getElementById("otp").value;
+
+  const res = await fetch(API + "/auth/verify-otp", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({phone, otp})
+  });
+
+  const data = await res.json();
+
+  if(data.token){
+    token = data.token;
+    notify("Login successful");
+  } else if(data.new_user){
+    notify("Register required");
+  } else {
+    notify("Error");
+  }
+}
+
+// 📝 REGISTER
+async function register(){
+  const phone = document.getElementById("phone").value;
+  const name = document.getElementById("name").value;
+  const city = document.getElementById("city").value;
+
+  const res = await fetch(API + "/auth/register", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({phone, name, city})
+  });
+
+  const data = await res.json();
+  token = data.token;
+  notify("Registered successfully");
+}
+
+// ⚡ TRIGGER CLAIM
+async function trigger(){
+  const res = await fetch(API + "/trigger", {
+    method: "POST",
+    headers: {Authorization: "Bearer " + token}
+  });
+
+  const data = await res.json();
+
+  if(data.amount){
+    notify("Claim ₹" + data.amount);
+  } else {
+    notify(data.message);
+  }
+
+  document.getElementById("output").innerText = JSON.stringify(data, null, 2);
+}
+
+// 💰 PAYOUT
+async function payout(){
+  const res = await fetch(API + "/payout", {
+    method: "POST",
+    headers: {Authorization: "Bearer " + token}
+  });
+
+  const data = await res.json();
+  notify("₹" + data.payout + " credited");
+
+  document.getElementById("output").innerText = JSON.stringify(data, null, 2);
+}
+
+// 👤 PROFILE
+async function profile(){
+  const res = await fetch(API + "/me", {
+    headers: {Authorization: "Bearer " + token}
+  });
+
+  const data = await res.json();
+
+  document.getElementById("output").innerText = JSON.stringify(data, null, 2);
+}
+</script>
+
+</body>
+</html>
